@@ -9,6 +9,10 @@ class Task extends Model
 {
     use HasFactory;
 
+    public $fillable = [
+        'parent_task_id','task','note','order','status','due','completion'
+    ];
+
     protected $with = [
 	    'subtasks'
 	];

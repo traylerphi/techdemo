@@ -17,6 +17,7 @@ class Tasks extends Migration
             $table->increments('id');
             $table->integer('parent_task_id')->unsigned()->nullable();
             $table->string('task');
+            $table->string('note')->nullable();
             $table->integer('order');
             $table->enum('status', ['Incomplete', 'Complete'])->default('Incomplete');
             $table->timestamp('due')->nullable();
