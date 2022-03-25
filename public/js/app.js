@@ -5358,6 +5358,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ['item'],
   data: function data() {
@@ -5367,6 +5373,26 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   methods: {
+    displayDate: function displayDate(datestring) {
+      if (!datestring) return '';
+      var datetime = new Date(datestring);
+      var meridian = "AM";
+      var hours = datetime.getHours();
+
+      if (hours > 12) {
+        hours -= 12;
+        meridian = "PM";
+      }
+
+      if (hours == 0) {
+        hours = 12;
+        meridian = "AM";
+      }
+
+      var minutes = datetime.getMinutes();
+      if (minutes < 10) minutes = "0" + minutes;
+      return datetime.toDateString() + " " + hours + ":" + minutes + " " + meridian;
+    },
     complete: function complete(event) {
       // Build now timestamp
       var today = new Date();
@@ -28244,19 +28270,113 @@ var render = function () {
       ),
       _vm._v(" "),
       _c("strong", [_vm._v("Due Date:")]),
-      _vm._v(" " + _vm._s(_vm.item.due)),
+      _vm._v(" "),
+      _c("input", {
+        directives: [
+          {
+            name: "show",
+            rawName: "v-show",
+            value: _vm.editmode,
+            expression: "editmode",
+          },
+          {
+            name: "model",
+            rawName: "v-model.lazy",
+            value: _vm.item.due,
+            expression: "item.due",
+            modifiers: { lazy: true },
+          },
+        ],
+        attrs: { type: "datetime-local" },
+        domProps: { value: _vm.item.due },
+        on: {
+          change: function ($event) {
+            return _vm.$set(_vm.item, "due", $event.target.value)
+          },
+        },
+      }),
+      _vm._v(" "),
+      _c(
+        "span",
+        {
+          directives: [
+            {
+              name: "show",
+              rawName: "v-show",
+              value: !_vm.editmode,
+              expression: "!editmode",
+            },
+          ],
+        },
+        [_vm._v(_vm._s(_vm.displayDate(_vm.item.due)))]
+      ),
+      _vm._v(" "),
       _c("br"),
       _vm._v(" "),
       _vm.item.completion
         ? _c("div", [
             _c("strong", [_vm._v("Completed:")]),
-            _vm._v(" " + _vm._s(_vm.item.completion) + "\n\t\t"),
+            _vm._v(
+              " " + _vm._s(_vm.displayDate(_vm.item.completion)) + "\n\t\t"
+            ),
           ])
         : _vm._e(),
       _vm._v(" "),
-      _c("strong", [_vm._v("Note:")]),
-      _vm._v("\n\t\t" + _vm._s(_vm.item.note) + "\n\t\t"),
-      _c("br"),
+      _vm.item.note || _vm.editmode
+        ? _c("strong", [_vm._v("Note:")])
+        : _vm._e(),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          directives: [
+            {
+              name: "show",
+              rawName: "v-show",
+              value: !_vm.editmode,
+              expression: "!editmode",
+            },
+          ],
+        },
+        [_vm._v(_vm._s(_vm.item.note))]
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          directives: [
+            {
+              name: "show",
+              rawName: "v-show",
+              value: _vm.editmode,
+              expression: "editmode",
+            },
+          ],
+        },
+        [
+          _c("textarea", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.item.note,
+                expression: "item.note",
+              },
+            ],
+            staticClass: "form-control",
+            attrs: { rows: "3" },
+            domProps: { value: _vm.item.note },
+            on: {
+              input: function ($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.$set(_vm.item, "note", $event.target.value)
+              },
+            },
+          }),
+        ]
+      ),
       _vm._v(" "),
       _vm.item.subtasks.length
         ? _c(

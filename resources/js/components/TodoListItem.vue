@@ -14,15 +14,21 @@
 			<button v-show="!item.completion" class="float-end btn btn-success" @click="complete">Mark Complete</button>
 			<button v-show="item.completion" class="float-end btn btn-secondary" @click="reopen">Re-Open Task</button>
 
-			<strong>Due Date:</strong> {{ item.due }}<br/>
+			<strong>Due Date:</strong>
+			<input v-show="editmode" v-model.lazy="item.due" type="datetime-local"/>
+			<span v-show="!editmode">{{ displayDate(item.due) }}</span>
+
+			<br/>
 
 			<div v-if="item.completion">
-				<strong>Completed:</strong> {{ item.completion }}
+				<strong>Completed:</strong> {{ displayDate(item.completion) }}
 			</div>
 
-			<strong>Note:</strong>
-			{{ item.note }}
-			<br/>
+			<strong v-if="item.note || editmode">Note:</strong>
+			<div v-show="!editmode">{{ item.note }}</div>
+			<div v-show="editmode">
+				<textarea  class="form-control" rows="3" v-model="item.note"></textarea>
+			</div>
 
 			<div v-if="item.subtasks.length">
 				<strong>Subtasks ({{ item.subtasks.length }}):</strong>
@@ -50,6 +56,23 @@
 		    }
 	  	},
     	methods: {
+    		displayDate(datestring) {
+    			if (!datestring) return '';
+    			const datetime = new Date(datestring);
+    			var meridian = "AM";
+    			var hours = datetime.getHours();
+    			if (hours > 12) {
+    				hours -= 12;
+    				meridian = "PM";
+    			}
+    			if (hours == 0) {
+    				hours = 12;
+    				meridian = "AM";
+    			}
+    			var minutes = datetime.getMinutes();
+    			if (minutes < 10) minutes = "0" + minutes;
+    			return datetime.toDateString() + " " + hours + ":" + minutes + " " + meridian;
+    		},
     		complete(event) {
     			// Build now timestamp
                 const today = new Date();

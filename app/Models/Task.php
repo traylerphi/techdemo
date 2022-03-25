@@ -17,6 +17,10 @@ class Task extends Model
 	    'subtasks'
 	];
 
+	protected $casts = [
+		'due' => 'datetime:Y-m-d\TH:00',
+	];
+
     public function subtasks()
     {
     	return $this->hasMany('App\Models\Task', 'parent_task_id', 'id')->orderBy('order')->with('subtasks');
