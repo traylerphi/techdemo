@@ -15,7 +15,7 @@ class Tasks extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('parent_task_id')->unsigned();
+            $table->integer('parent_task_id')->unsigned()->nullable();
             $table->string('task');
             $table->integer('order');
             $table->enum('status', ['Incomplete', 'Complete'])->default('Incomplete');

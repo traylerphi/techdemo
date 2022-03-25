@@ -15,7 +15,9 @@ class TaskController extends Controller
      */
     public function index()
     {
-        //
+        // Get entire tree
+        $tasks = Task::where('parent_task_id',null)->orderBy('order')->get();
+        return $tasks->toJson();
     }
 
     /**
