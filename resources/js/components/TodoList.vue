@@ -6,7 +6,7 @@
 					<div class="card-header">Todo List</div>
 					<div class="card-body">
 						<li v-for="task in tasks">
-							{{ task }}
+							<todo-list-item :item="task" />
 						</li>
 					</div>
 				</div>
@@ -16,25 +16,17 @@
 </template>
 
 <script>
+	Vue.component('todo-list-item', require('./TodoListItem.vue').default);
     export default {
-       props: {
-           tasks: {
-               type: Object,
-               default: () => ({}),
-           }
-       }
-    ,
-     /*
-  data () {
-	    return {
-	      tasks: null
-	    }
-	  },
-	  */
-	mounted () {
-	    axios
-	      .get('/api/task')
-	      .then(response => (this.tasks = response.data))
-	  }
-  }
+	  	data () {
+		    return {
+		      tasks: null
+		    }
+	  	},
+		mounted () {
+		    axios
+		      .get('/api/task')
+		      .then(response => (this.tasks = response.data))
+	  	}
+	}
 </script>
