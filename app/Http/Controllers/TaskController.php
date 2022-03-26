@@ -16,7 +16,7 @@ class TaskController extends Controller
     public function index()
     {
         // Get entire tree
-        $tasks = Task::where('parent_task_id',null)->orderBy('order')->get();
+        $tasks = Task::where('parent_task_id',null)->orderBy('completion')->orderBy('due')->get();
         return $tasks->toJson();
     }
 
@@ -94,5 +94,12 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         //
+        if (isset($_GET['movesubs'])) {
+            if ($_GET['movesubs'] == 1) {
+                Task::where('parent_task_id', $task->id)->update(['parent_task_id' => $task->parent_task_id]);
+            }
+        }
+        $task->delete();
+        return $task;
     }
 }

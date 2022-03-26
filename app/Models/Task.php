@@ -23,6 +23,6 @@ class Task extends Model
 
     public function subtasks()
     {
-    	return $this->hasMany('App\Models\Task', 'parent_task_id', 'id')->orderBy('order')->with('subtasks');
+    	return $this->hasMany('App\Models\Task', 'parent_task_id', 'id')->orderBy('completion')->orderBy('due')->with('subtasks');
     }
 }

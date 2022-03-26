@@ -32,11 +32,14 @@
 		    }
 	  	},
 		mounted () {
-		    axios
-		      .get('/api/task')
-		      .then(response => (this.tasks = response.data))
+			this.reload();
 	  	},
     	methods: {
+    		reload() {
+			    axios
+			      .get('/api/task')
+			      .then(response => (this.tasks = response.data))
+    		},
 			create(event) {
 				const newTask = {
 					"parent_task_id" : null,

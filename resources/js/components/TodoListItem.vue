@@ -5,8 +5,10 @@
 			<strong v-show="!editmode">{{ item.task }}</strong>
 
 			<div v-if="!item.completion" class="col-md-1 float-end text-right">
-				<i role="button" alt="Edit" class="bi bi-lock" v-show="!editmode" @click="editmode = 1"></i>
-				<i role="button" alt="Lock" class="bi bi-unlock-fill" v-show="editmode" @click="save"></i>
+				<i role="button" alt="Edit" title="Edit" class="bi bi-lock" v-show="!editmode" @click="editmode = 1"></i>
+				<i role="button" alt="Lock" title="Lock" class="bi bi-unlock-fill" v-show="editmode" @click="save"></i>
+				<i role="button" alt="Delete" title="Delete" class="bi bi-trash3" @click="deleteConfirm"></i>
+				<multi-option-confirm ref="multiOptionConfirm"></multi-option-confirm>
 			</div>
 		</div>
 		<div class="card-body">
@@ -55,8 +57,10 @@
 </template>
 
 <script>
-    export default {
+	import MultiOptionConfirm from './MultiOptionConfirm.vue'
 
+	export default {
+	    components: { MultiOptionConfirm },
     	props: ['item'],
 	  	data () {
 		    return {
@@ -96,6 +100,7 @@
 				axios
 					.post('/api/task', newTask)
 					.then(response => this.item.subtasks.push(response.data));
+				this.showsubs = 1;
     		},
     		complete(event) {
     			// Build now timestamp
@@ -117,6 +122,42 @@
     			this.item.completion = null;
     			this.showsubs = 1;
     			this.save(event);
+            },
+            deleteConfirm(event) {
+            	if (this.item.subtasks.length)
+            	{
+            		var buttons = {
+            			"Yes"   : this.deleteDropSubs,
+            			"No"    : this.deleteMoveSubs,
+            			"Cancel": this.deleteCancel
+            		};
+            		var message = "Delete Subtasks also?";
+
+            	} else {
+            		var buttons = {
+            			"OK"    : this.deleteDropSubs,
+            			"Cancel": this.deleteCancel
+            		};
+            		var message = "";
+            	}
+	            this.$refs.multiOptionConfirm.show({
+	                title: "Delete '" + this.item.task + "'?",
+	                message: message,
+	                buttons: buttons
+	            });
+            },
+            deleteDropSubs() {
+            	axios.delete('/api/task/'+this.item.id);
+            	this.reload();
+            },
+            deleteMoveSubs() {
+            	axios.delete('/api/task/'+this.item.id+'?movesubs=1');
+            	this.reload();
+            },
+            deleteCancel() {
+            },
+            reload() {
+            	this.$parent.reload();
             },
             save(event) {
     			this.editmode = 0
