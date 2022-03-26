@@ -16,7 +16,12 @@ class TaskController extends Controller
     public function index()
     {
         // Get entire tree
-        $tasks = Task::where('parent_task_id',null)->orderBy('completion')->orderBy('due')->get();
+        $tasks = Task::where('parent_task_id',null)
+                ->where(function($query) {
+                    $query->where('completion','>',date("Y-m-d",mktime(0,0,0,date("m"),date("d")-3,date("Y"))))
+                          ->orWhereNull('completion');
+                })
+                ->orderBy('completion')->orderBy('due')->get();
         return $tasks->toJson();
     }
 

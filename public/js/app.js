@@ -5440,6 +5440,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _MultiOptionConfirm_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MultiOptionConfirm.vue */ "./resources/js/components/MultiOptionConfirm.vue");
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+//
 //
 //
 //
@@ -5511,6 +5518,51 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   methods: {
+    statusHeaderClass: function statusHeaderClass() {
+      if (this.item.completion) return 'bg-success';
+      var now = new Date();
+      var due = new Date(this.item.due);
+      if (now > due) return 'bg-danger';
+      now.setDate(now.getDate() + 1); // now is tomorrow
+
+      if (now > due) return 'bg-warning text-dark';
+      return 'bg-secondary';
+    },
+    completable: function completable() {
+      if (this.item.subtasks.length == 0) {
+        return true;
+      }
+
+      return this.allTasksComplete(this.item);
+    },
+    allTasksComplete: function allTasksComplete(task) {
+      if (task.subtasks.length == 0) {
+        return task.completion ? true : false;
+      } else {
+        var _iterator = _createForOfIteratorHelper(task.subtasks),
+            _step;
+
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var subtask = _step.value;
+
+            if (!subtask.completion) {
+              return false;
+            }
+
+            if (this.allTasksComplete(subtask) === false) {
+              return false;
+            }
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+
+        return true;
+      }
+    },
     displayDate: function displayDate(datestring) {
       if (!datestring) return '';
       var datetime = new Date(datestring);
@@ -5545,7 +5597,11 @@ __webpack_require__.r(__webpack_exports__);
         "subtasks": []
       };
       axios.post('/api/task', newTask).then(function (response) {
-        return _this.item.subtasks.push(response.data);
+        _this.item.subtasks.unshift(response.data);
+
+        _this.$nextTick(function () {
+          _this.$refs['task-' + _this.item.subtasks[0].id][0].editmode = 1;
+        });
       });
       this.showsubs = 1;
     },
@@ -28999,10 +29055,7 @@ var render = function () {
   return _c("div", { staticClass: "card" }, [
     _c(
       "div",
-      {
-        staticClass: "card-header text-light",
-        class: _vm.item.completion ? "bg-success" : "bg-secondary",
-      },
+      { staticClass: "card-header text-light", class: _vm.statusHeaderClass() },
       [
         _c("input", {
           directives: [
@@ -29103,8 +29156,8 @@ var render = function () {
             {
               name: "show",
               rawName: "v-show",
-              value: !_vm.item.completion,
-              expression: "!item.completion",
+              value: !_vm.item.completion && _vm.completable(),
+              expression: "!item.completion && completable()",
             },
           ],
           staticClass: "float-end btn btn-success",
@@ -29178,7 +29231,7 @@ var render = function () {
         ? _c("div", [
             _c("strong", [_vm._v("Completed:")]),
             _vm._v(
-              " " + _vm._s(_vm.displayDate(_vm.item.completion)) + "\n\t\t"
+              " " + _vm._s(_vm.displayDate(_vm.item.completion)) + "\n\t\t\t"
             ),
           ])
         : _vm._e(),
@@ -29313,6 +29366,8 @@ var render = function () {
                   },
                 ],
                 key: task.id,
+                ref: "task-" + task.id,
+                refInFor: true,
                 attrs: { item: task },
               })
             }),

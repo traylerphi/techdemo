@@ -1,6 +1,6 @@
 <template>
 	<div class="card">
-		<div class="card-header text-light" :class="item.completion ? 'bg-success' : 'bg-secondary'">
+		<div class="card-header text-light" :class="statusHeaderClass()">
 			<input v-show="editmode" v-model.lazy="item.task" class="col-md-10"/>
 			<strong v-show="!editmode">{{ item.task }}</strong>
 
@@ -13,7 +13,7 @@
 		</div>
 		<div class="card-body">
 
-			<button v-show="!item.completion" class="float-end btn btn-success" @click="complete">Mark Complete</button>
+			<button v-show="!item.completion && completable()" class="float-end btn btn-success" @click="complete">Mark Complete</button>
 			<button v-show="item.completion" class="float-end btn btn-secondary" @click="reopen">Re-Open Task</button>
 
 			<strong>Due Date:</strong>
@@ -49,7 +49,8 @@
 					v-show="showsubs"
 					v-for="task in item.subtasks"
 					:key="task.id"
-					:item="task">
+					:item="task"
+                    :ref="'task-'+task.id">
 				</todo-list-item>
 			</div>
 		</div>
@@ -69,6 +70,46 @@
 		    }
 	  	},
     	methods: {
+    		statusHeaderClass() {
+    			if (this.item.completion) return 'bg-success';
+
+    			var now = new Date();
+    			var due = new Date(this.item.due);
+
+    			if (now > due) return 'bg-danger';
+
+    			now.setDate(now.getDate() + 1); // now is tomorrow
+    			if (now > due) return 'bg-warning text-dark';
+
+				return 'bg-secondary'
+    		},
+    		completable() {
+    			if (this.item.subtasks.length == 0) {
+    				return true;
+    			}
+    			return this.allTasksComplete(this.item);
+    		},
+    		allTasksComplete(task) {
+    			if (task.subtasks.length == 0)
+    			{
+    				return (task.completion)? true : false;
+    			}
+    			else
+    			{
+    				for(var subtask of task.subtasks)
+    				{
+		    			if (!subtask.completion)
+						{
+							return false;
+						}
+    					if (this.allTasksComplete(subtask) === false)
+    					{
+    						return false;
+    					}
+    				}
+    				return true;
+    			}
+    		},
     		displayDate(datestring) {
     			if (!datestring) return '';
     			const datetime = new Date(datestring);
@@ -99,7 +140,12 @@
 				};
 				axios
 					.post('/api/task', newTask)
-					.then(response => this.item.subtasks.push(response.data));
+					.then(response => {
+                        this.item.subtasks.unshift(response.data);
+                        this.$nextTick(() => {
+                            this.$refs['task-' + this.item.subtasks[0].id][0].editmode = 1;
+                    });
+                });
 				this.showsubs = 1;
     		},
     		complete(event) {
