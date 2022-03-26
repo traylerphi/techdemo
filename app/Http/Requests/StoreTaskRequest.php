@@ -13,7 +13,7 @@ class StoreTaskRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,13 @@ class StoreTaskRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'parent_task_id' => ['sometimes'],
+            'task' => ['sometimes'],
+            'note' => ['sometimes'],
+            'order' => ['sometimes'],
+            'status' => ['sometimes'],
+            'due' => ['sometimes'],
+            'completion' => ['sometimes']
         ];
     }
 }

@@ -24,7 +24,6 @@ class UpdateTaskRequest extends FormRequest
     public function rules()
     {
         return [
-            
             'parent_task_id' => ['sometimes'],
             'task' => ['sometimes'],
             'note' => ['sometimes'],

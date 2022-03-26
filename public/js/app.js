@@ -5287,6 +5287,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 Vue.component('todo-list-item', (__webpack_require__(/*! ./TodoListItem.vue */ "./resources/js/components/TodoListItem.vue")["default"]));
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ['displaydate'],
@@ -5301,6 +5304,25 @@ Vue.component('todo-list-item', (__webpack_require__(/*! ./TodoListItem.vue */ "
     axios.get('/api/task').then(function (response) {
       return _this.tasks = response.data;
     });
+  },
+  methods: {
+    create: function create(event) {
+      var _this2 = this;
+
+      var newTask = {
+        "parent_task_id": null,
+        "task": "New Task",
+        "note": null,
+        "order": this.tasks.length + 1,
+        "status": "Incomplete",
+        "due": null,
+        "completion": null,
+        "subtasks": []
+      };
+      axios.post('/api/task', newTask).then(function (response) {
+        return _this2.tasks.unshift(response.data);
+      });
+    }
   }
 });
 
@@ -5317,6 +5339,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -5392,6 +5423,23 @@ __webpack_require__.r(__webpack_exports__);
       var minutes = datetime.getMinutes();
       if (minutes < 10) minutes = "0" + minutes;
       return datetime.toDateString() + " " + hours + ":" + minutes + " " + meridian;
+    },
+    create: function create(event) {
+      var _this = this;
+
+      var newTask = {
+        "parent_task_id": this.item.id,
+        "task": "New Subtask",
+        "note": null,
+        "order": this.item.subtasks.length + 1,
+        "status": "Incomplete",
+        "due": null,
+        "completion": null,
+        "subtasks": []
+      };
+      axios.post('/api/task', newTask).then(function (response) {
+        return _this.item.subtasks.push(response.data);
+      });
     },
     complete: function complete(event) {
       // Build now timestamp
@@ -28103,22 +28151,32 @@ var render = function () {
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "container" }, [
     _c("div", { staticClass: "row justify-content-center" }, [
-      _c("div", { staticClass: "col-md-8" }, [
+      _c("div", { staticClass: "col-md-10" }, [
         _c("div", { staticClass: "card" }, [
           _c("div", { staticClass: "card-header text-center" }, [
-            _c("strong", [_vm._v("Todo List - " + _vm._s(_vm.displaydate))]),
+            _c("strong", [_vm._v("ToDo List - " + _vm._s(_vm.displaydate))]),
           ]),
           _vm._v(" "),
           _c(
             "div",
             { staticClass: "card-body" },
-            _vm._l(_vm.tasks, function (task) {
-              return _c("todo-list-item", {
-                key: task.id,
-                attrs: { item: task },
-              })
-            }),
-            1
+            [
+              _c("div", { staticClass: "text-end" }, [
+                _c(
+                  "button",
+                  { staticClass: "btn btn-primary", on: { click: _vm.create } },
+                  [_vm._v("Add Task")]
+                ),
+              ]),
+              _vm._v(" "),
+              _vm._l(_vm.tasks, function (task) {
+                return _c("todo-list-item", {
+                  key: task.id,
+                  attrs: { item: task },
+                })
+              }),
+            ],
+            2
           ),
         ]),
       ]),
@@ -28152,8 +28210,8 @@ var render = function () {
     _c(
       "div",
       {
-        staticClass: "card-header",
-        class: _vm.item.completion ? "bg-success" : "",
+        staticClass: "card-header text-light",
+        class: _vm.item.completion ? "bg-success" : "bg-secondary",
       },
       [
         _c("input", {
@@ -28327,7 +28385,7 @@ var render = function () {
         : _vm._e(),
       _vm._v(" "),
       _c(
-        "div",
+        "pre",
         {
           directives: [
             {
@@ -28378,52 +28436,35 @@ var render = function () {
         ]
       ),
       _vm._v(" "),
-      _vm.item.subtasks.length
-        ? _c(
-            "div",
-            [
-              _c("strong", [
-                _vm._v("Subtasks (" + _vm._s(_vm.item.subtasks.length) + "):"),
-              ]),
-              _vm._v(" "),
-              _c("i", {
-                directives: [
-                  {
-                    name: "show",
-                    rawName: "v-show",
-                    value: !_vm.showsubs,
-                    expression: "!showsubs",
+      _c("div", { staticClass: "row" }, [
+        _c("div", { staticClass: "col-6" }, [
+          _vm.item.subtasks.length
+            ? _c("span", { staticClass: "align-bottom" }, [
+                _c("strong", { staticClass: "float-start" }, [
+                  _vm._v(
+                    "Subtasks (" + _vm._s(_vm.item.subtasks.length) + "):"
+                  ),
+                ]),
+                _vm._v(" "),
+                _c("i", {
+                  directives: [
+                    {
+                      name: "show",
+                      rawName: "v-show",
+                      value: !_vm.showsubs,
+                      expression: "!showsubs",
+                    },
+                  ],
+                  staticClass: "bi bi-eye",
+                  attrs: { role: "button", alt: "Edit" },
+                  on: {
+                    click: function ($event) {
+                      _vm.showsubs = 1
+                    },
                   },
-                ],
-                staticClass: "bi bi-eye",
-                attrs: { role: "button", alt: "Edit" },
-                on: {
-                  click: function ($event) {
-                    _vm.showsubs = 1
-                  },
-                },
-              }),
-              _vm._v(" "),
-              _c("i", {
-                directives: [
-                  {
-                    name: "show",
-                    rawName: "v-show",
-                    value: _vm.showsubs,
-                    expression: "showsubs",
-                  },
-                ],
-                staticClass: "bi bi-eye-slash",
-                attrs: { role: "button", alt: "Lock" },
-                on: {
-                  click: function ($event) {
-                    _vm.showsubs = 0
-                  },
-                },
-              }),
-              _vm._v(" "),
-              _vm._l(_vm.item.subtasks, function (task) {
-                return _c("todo-list-item", {
+                }),
+                _vm._v(" "),
+                _c("i", {
                   directives: [
                     {
                       name: "show",
@@ -28432,12 +28473,47 @@ var render = function () {
                       expression: "showsubs",
                     },
                   ],
-                  key: task.id,
-                  attrs: { item: task },
-                })
-              }),
-            ],
-            2
+                  staticClass: "bi bi-eye-slash",
+                  attrs: { role: "button", alt: "Lock" },
+                  on: {
+                    click: function ($event) {
+                      _vm.showsubs = 0
+                    },
+                  },
+                }),
+              ])
+            : _vm._e(),
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "col-6 text-end" }, [
+          !_vm.item.completion
+            ? _c(
+                "button",
+                { staticClass: "btn btn-primary", on: { click: _vm.create } },
+                [_vm._v("Add Subtask")]
+              )
+            : _vm._e(),
+        ]),
+      ]),
+      _vm._v(" "),
+      _vm.item.subtasks.length
+        ? _c(
+            "div",
+            _vm._l(_vm.item.subtasks, function (task) {
+              return _c("todo-list-item", {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: _vm.showsubs,
+                    expression: "showsubs",
+                  },
+                ],
+                key: task.id,
+                attrs: { item: task },
+              })
+            }),
+            1
           )
         : _vm._e(),
     ]),
