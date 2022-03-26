@@ -5387,6 +5387,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 Vue.component('todo-list-item', (__webpack_require__(/*! ./TodoListItem.vue */ "./resources/js/components/TodoListItem.vue")["default"]));
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   props: ['displaydate'],
@@ -5420,7 +5421,11 @@ Vue.component('todo-list-item', (__webpack_require__(/*! ./TodoListItem.vue */ "
         "subtasks": []
       };
       axios.post('/api/task', newTask).then(function (response) {
-        return _this2.tasks.unshift(response.data);
+        _this2.tasks.unshift(response.data);
+
+        _this2.$nextTick(function () {
+          _this2.$refs['task-' + _this2.tasks[0].id][0].editmode = 1;
+        });
       });
     }
   }
@@ -29018,6 +29023,8 @@ var render = function () {
               _vm._l(_vm.tasks, function (task) {
                 return _c("todo-list-item", {
                   key: task.id,
+                  ref: "task-" + task.id,
+                  refInFor: true,
                   attrs: { item: task },
                 })
               }),

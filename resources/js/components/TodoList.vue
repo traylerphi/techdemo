@@ -13,7 +13,8 @@
 						<todo-list-item
 							v-for="task in tasks"
 							:key="task.id"
-							:item="task">
+							:item="task"
+							:ref="'task-'+task.id">
 						</todo-list-item>
 					</div>
 				</div>
@@ -53,7 +54,12 @@
 				};
 				axios
 					.post('/api/task', newTask)
-					.then(response => this.tasks.unshift(response.data));
+					.then(response => {
+                        this.tasks.unshift(response.data);
+                        this.$nextTick(() => {
+                            this.$refs['task-' + this.tasks[0].id][0].editmode = 1;
+                    });
+                });
 			}
 		}
 	}
